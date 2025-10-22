@@ -1,0 +1,42 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load your CSV with millisecond timestamps
+df = pd.read_csv('DATA.CSV')
+
+# Convert milliseconds to datetime
+#df['ms'] = pd.to_datetime(df['Time'], unit='ms')
+#df.set_index('Time', inplace=True)
+
+# Create subplots
+fig, axs = plt.subplots(nrows=3, ncols=1, figsize=(12, 8), sharex=True)
+
+# Plot each sensor separately
+df['ax'].plot(ax=axs[0], color='blue', title='Altitude (meters)')
+axs[0].set_ylabel('Meters')
+axs[0].grid(True)
+
+df['ay'].plot(ax=axs[1], color='purple', title='Air Pressure (hPa)')
+axs[1].set_ylabel('hPa')
+axs[1].grid(True)
+
+df['az'].plot(ax=axs[2], color='red', title='tempreture (C)')
+axs[2].set_ylabel('C')
+axs[2].grid(True)
+
+df['gx'].plot(ax=axs[2], color='red', title='tempreture (C)')
+axs[2].set_ylabel('C')
+axs[2].grid(True)
+
+df['gy'].plot(ax=axs[2], color='red', title='tempreture (C)')
+axs[2].set_ylabel('C')
+axs[2].grid(True)
+
+df['T'].plot(ax=axs[2], color='red', title='tempreture (C)')
+axs[2].set_ylabel('C')
+axs[2].grid(True)
+
+# Common x-label
+plt.xlabel('Time')
+plt.tight_layout()
+plt.show()
