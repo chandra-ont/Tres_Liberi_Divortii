@@ -1,2 +1,2 @@
-idf_component_register(SRCS "Capsule.c"
+idf_component_register(SRCS "IIC.c" "Capsule.c"
                     INCLUDE_DIRS ".")
