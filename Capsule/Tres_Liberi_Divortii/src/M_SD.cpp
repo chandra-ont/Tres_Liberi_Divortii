@@ -79,6 +79,15 @@ void SD_setup(int spiPin, String h1, String h2, String h3, String h4, String h5)
     }
     dataFile.close();
 }
-
+void SD_log(String data){
+    dataFile = SD.open("file.csv", FILE_WRITE);
+    if (dataFile) {
+    dataFile.println(data+"\n"); 
+    dataFile.close();
+    Serial.println("Wrote new line to file.csv");
+    } else {
+    Serial.println("error opening file.csv");
+    }
+}
 
 
