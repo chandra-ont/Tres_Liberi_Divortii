@@ -7,14 +7,10 @@
 int myFunction(int, int);
 
 void setup() {
-  Serial.println(UV_S()); // Initialize the UV sensor
+  U_setup(); // Initialize the UV sensor
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
-}
