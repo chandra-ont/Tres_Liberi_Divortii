@@ -1,8 +1,11 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SdFat.h>
+// #include <string>
+// using std::string>
 
 File root;
+File dataFile;
 void printDirectory(File dir, int numTabs) {
 
 
@@ -46,7 +49,7 @@ void printDirectory(File dir, int numTabs) {
 
   }
 }
-void SD_setup(int SPI_p){
+void SD_setup(int spiPin, String h1, String h2, String h3, String h4, String h5){
     
 
     Serial.println("Initializing SD card...");
@@ -57,13 +60,24 @@ void SD_setup(int SPI_p){
     Serial.println("initialization failed!");
     while (1);
     }
-    Serial.println("/n initialization done.");
+    Serial.println("\n initialization done.");
 
     root = SD.open("/");
-
     printDirectory(root, 0);
+    root.close();
 
-    Serial.println("done!");
+    String header = h1 + "," + h2 + "," + h3 + "," + h4 + "," + h5;
+    Serial.print("Starting up file.csv \n headers: ");
+    Serial.println(header);
+
+    dataFile = SD.open("file.csv", FILE_WRITE);
+    if (dataFile) {
+    Serial.print("Writing to file.csv...");
+    dataFile.println(header); 
+    } else {
+    Serial.println("error opening file.csv");
+    }
+    dataFile.close();
 }
 
 
