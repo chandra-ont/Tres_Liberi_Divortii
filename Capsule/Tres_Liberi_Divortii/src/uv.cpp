@@ -44,9 +44,12 @@ void U_setup() {
   UV.configInterrupt(true, LTR390_MODE_UVS);
 }
 
-void U_loop() {
+int U_loop() {
   if (UV.newDataAvailable()) {
-      Serial.print("UV data: "); 
-      Serial.print(UV.readUVS());
+    uint32_t uvs = UV.readUVS();
+    return uvs;
+  }
+  else {
+    return false; // No new data
   }
 }
