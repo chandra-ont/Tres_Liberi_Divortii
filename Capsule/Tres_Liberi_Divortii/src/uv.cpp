@@ -3,7 +3,7 @@
 Adafruit_LTR390 UV = Adafruit_LTR390();
 
 void U_setup() {
-  Serial.begin(115200);
+  
   Serial.println("Adafruit LTR-390 test");
 
   if ( ! UV.begin() ) {
