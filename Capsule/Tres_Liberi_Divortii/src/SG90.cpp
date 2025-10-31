@@ -16,7 +16,7 @@ void SerSetup() {
 int TurnServo(int sensor[8]) {
     int highestValue[2] = {0, 0} ;
     int secoundHValue[2] = {0, 0};
-    int turnDegree = 0;
+    int turnDegree = 0;  
     for (int i = 0; i < 8; i++) {
         if (sensor[i]>highestValue[0]) {
             if (highestValue[0]>secoundHValue[0]) {
@@ -42,4 +42,5 @@ int TurnServo(int sensor[8]) {
     }
     turnDegree = std::floor(turnDegree/2);
     myservo.write(turnDegree);  
+    return turnDegree;
 }
