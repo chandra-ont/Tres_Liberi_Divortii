@@ -1,5 +1,7 @@
 #include <ESP32Servo.h>
+#include <iostream>
 
+using namespace std;
 
 int pos = 0;   
 int servoPin = 18;
@@ -13,7 +15,7 @@ void SerSetup() {
 
 }
 
-int TurnServo(int sensor[8]) {
+void TurnServo(int sensor[8]) {
     int highestValue[2] = {0, 0} ;
     int secoundHValue[2] = {0, 0};
     int turnDegree = 0;  
@@ -41,6 +43,6 @@ int TurnServo(int sensor[8]) {
          
     }
     turnDegree = std::floor(turnDegree/2);
-    myservo.write(turnDegree);  
-    return turnDegree;
+    cout << turnDegree;      //myservo.write(turnDegree);  
+    // return turnDegree;
 }
