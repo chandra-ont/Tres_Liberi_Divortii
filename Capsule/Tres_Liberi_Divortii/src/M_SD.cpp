@@ -15,7 +15,7 @@ void printDirectory(File dir, int numTabs) {
 
     if (! entry) {
 
-      // no more files
+      
 
       break;
 
@@ -49,7 +49,12 @@ void printDirectory(File dir, int numTabs) {
 
   }
 }
-void SD_setup(int spiPin, String h1, String h2, String h3, String h4, String h5){
+void SD_setup(int spiPin,
+              const char* h1,
+              const char* h2,
+              const char* h3,
+              const char* h4,
+              const char* h5){
     
 
     Serial.println("Initializing SD card...");
@@ -65,8 +70,7 @@ void SD_setup(int spiPin, String h1, String h2, String h3, String h4, String h5)
     root = SD.open("/");
     printDirectory(root, 0);
     root.close();
-
-    String header = h1 + "," + h2 + "," + h3 + "," + h4 + "," + h5;
+    String header = String(h1) + "," + String(h2) + "," + String(h3) + "," + String(h4) + "," + String(h5);
     Serial.print("Starting up file.csv \n headers: ");
     Serial.println(header);
 
@@ -79,17 +83,54 @@ void SD_setup(int spiPin, String h1, String h2, String h3, String h4, String h5)
     }
     dataFile.close();
 }
-int SD_log(String data){
-    dataFile = SD.open("file.csv", FILE_WRITE);
+int SD_log(int64_t time, int32_t voc, uint16_t sraw, const char* h4, const char* h5) {
+    File dataFile = SD.open("file.csv", FILE_WRITE);
     if (dataFile) {
-    dataFile.println(data+"\n"); 
-    dataFile.close();
-    Serial.println("Wrote new line to file.csv");
-    return true;
+        dataFile.printf("%lld,%d,%u,%s,%s\n",
+                        (long long)time, voc, sraw, h4, h5);
+        dataFile.close();
+        Serial.println("Wrote new line to file.csv");
+        return true;
     } else {
-    Serial.println("error opening file.csv");
-    return false;
+        Serial.println("error opening file.csv");
+        return false;
     }
 }
 
+void printCSVFile(const char* filename) {
+  // Open the file for reading
+  File dataFile = SD.open(filename, FILE_READ);
+  
+  if (!dataFile) {
+    Serial.print("Error opening file: ");
+    Serial.println(filename);
+    return;
+  }
+  
+  Serial.print("Reading file: ");
+  Serial.println(filename);
+  Serial.println("----------------------------------------");
+  
+  int lineNumber = 1;
+  
+  // Read and print all lines one by one
+  while (dataFile.available()) {
+    String line = dataFile.readStringUntil('\n');
+    line.trim(); // Remove whitespace and carriage returns
+    
+    if (line.length() > 0) {
+      Serial.print("Line ");
+      Serial.print(lineNumber);
+      Serial.print(": ");
+      Serial.println(line);
+      lineNumber++;
+    }
+  }
+  
+  Serial.println("----------------------------------------");
+  Serial.print("Total lines: ");
+  Serial.println(lineNumber - 1);
+  
+  dataFile.close();
+}
 
