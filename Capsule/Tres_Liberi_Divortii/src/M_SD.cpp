@@ -83,11 +83,11 @@ void SD_setup(int spiPin,
     }
     dataFile.close();
 }
-int SD_log(int64_t time, int32_t voc, uint16_t sraw, const char* h4, const char* h5) {
+int SD_log(int64_t time, int32_t voc, uint16_t sraw, float temp, float pressure) {
     File dataFile = SD.open("file.csv", FILE_WRITE);
     if (dataFile) {
-        dataFile.printf("%lld,%d,%u,%s,%s\n",
-                        (long long)time, voc, sraw, h4, h5);
+        dataFile.printf("%lld,%d,%u,%f,%f\n",
+                        (long long)time, voc, sraw, temp, pressure);
         dataFile.close();
         Serial.println("Wrote new line to file.csv");
         return true;
