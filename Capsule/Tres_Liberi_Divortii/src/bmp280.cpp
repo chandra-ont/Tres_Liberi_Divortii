@@ -7,8 +7,8 @@ Adafruit_BMP280 bmp; // use I2C interface
 Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
 
-void B_setup() {
-
+String B_setup() {
+  String err = "Working";
   Serial.println(F("BMP280 Sensor start test"));
 
   unsigned status;
@@ -17,7 +17,7 @@ void B_setup() {
   if (!status) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                       "try a different address!"));
-    Serial.print("SensorID was: 0x"); Serial.println(bmp.sensorID(),16);
+    err = ("SensorID was: 0x"); err += String(bmp.sensorID(),16);
     Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
     Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
     Serial.print("        ID of 0x60 represents a BME 280.\n");
@@ -33,7 +33,8 @@ void B_setup() {
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 
   bmp_temp->printSensorDetails();
-}
+    return err;
+  }
 
 int readTemperature() {
   sensors_event_t temp_event;
