@@ -13,10 +13,8 @@
 #define PIN_SCK  18
 #define CS_LORA  1
 #define CS_SD    2
-
 #define SDA_PIN 4   
 #define SCL_PIN 21
-
 #define RXD2 16
 #define TXD2 17
 
@@ -30,6 +28,9 @@ using namespace std;
 
 int temp = 0;
 int pressure = 0;
+
+void Logg();
+void startup();
 
 void setup()
 {
@@ -61,9 +62,16 @@ void setup()
 }
 
 void loop()
-{
-    for (int i = 0; i < 10; i++) {
-        
+{        
+    startup();
+    
+    
+    
+    printCSVFile("file.csv");
+}
+
+
+void Logg(){
     float tf = static_cast<float>(temp);   
     int32_t voc_index = SGP_loop(tf);
     uint16_t sraw = Get_raw(tf);
@@ -72,9 +80,15 @@ void loop()
     int pressure = readPressure();
 
     SD_log(time, voc_index, sraw, temp, pressure);
-    delay(2000);
+    
     Serial.println("Logged data");
+};
+
+void startup(){
+    
+    for (int i = 0; i < 10; i++) {
+        Logg();
+        delay(1000);
     }
-    Serial.println("Finished logging 10 entries");
-    printCSVFile("file.csv");
+    Serial.println("Data logging finished.");
 }
