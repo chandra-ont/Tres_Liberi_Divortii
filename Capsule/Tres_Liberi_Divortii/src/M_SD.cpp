@@ -49,7 +49,7 @@ void printDirectory(File dir, int numTabs) {
 
   }
 }
-void SD_setup(int spiPin,
+int SD_setup(int spiPin,
               const char* h1,
               const char* h2,
               const char* h3,
@@ -76,10 +76,12 @@ void SD_setup(int spiPin,
 
     dataFile = SD.open("file.csv", FILE_WRITE);
     if (dataFile) {
-    Serial.print("Writing to file.csv...");
+    return true;
     dataFile.println(header); 
+    
+    return true;
     } else {
-    Serial.println("error opening file.csv");
+    return false;
     }
     dataFile.close();
 }

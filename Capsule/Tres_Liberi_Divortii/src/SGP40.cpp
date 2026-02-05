@@ -3,8 +3,8 @@
 
 Adafruit_SGP40 sgp;
 
-
-void SGP_setup() {
+int trys = 0;
+int SGP_setup() {
   while (!Serial) { delay(10); } // Wait for serial console to open!
 
   Serial.println("SGP40 test");
