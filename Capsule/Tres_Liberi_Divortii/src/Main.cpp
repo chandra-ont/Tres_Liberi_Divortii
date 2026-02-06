@@ -6,6 +6,11 @@
 #include "esp_timer.h"
 #include "bmp280.h"
 #include "WS.h"
+#include "Ozone.h"
+#include "NO.h"
+#include "UV.h"
+#include "gyro.h"
+
 #include <Wire.h>
 #include <SPI.h>
 #include <vector>
@@ -35,6 +40,9 @@ struct SensorData {
     int pressure;
     int NO;
     int UV;
+    float gyrox;
+    float gyroy;
+    float gyroz;
     String toString() const {
         return String(time) + "," +
                String(temp) + "," +
@@ -43,6 +51,9 @@ struct SensorData {
                String(voc_index) + "," +
                String(NO) + "," +
                String(UV) + "," +
+               String(gyrox) + "," +
+               String(gyroy) + "," +
+               String(gyroz) + "," +
                String(sraw);
     }
 };
@@ -72,6 +83,9 @@ SensorInfo UnitNames[8] = {
 void Logg();
 void startup();
 String Test();
+SensorData readSensors();
+String getinfo();
+void test();
 
 void setup()
 {
@@ -85,10 +99,10 @@ void setup()
     spi.begin(PIN_SCK, PIN_MISO, PIN_MOSI);
 
     pinMode(CS_SD, OUTPUT);
-    pinMode(CS_LORA, OUTPUT);
+    
 
     digitalWrite(CS_SD, HIGH);
-    digitalWrite(CS_LORA, HIGH);
+    
 
     //I²C SETUP
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -97,10 +111,19 @@ void setup()
 
 
     // SETUP sensors
-    if (!SD_setup(4, "Time", "Voc_idx", "Sraw_SGP", "Temp", "pressure")) {
+    if (!SD_setup("Time", "Voc_idx", "Sraw_SGP", "Temp", "pressure", "NO", "UV", "ozone", "gyro")) {
         UnitNames[0].status = "Failed to write SD";
     }
-    SGP_setup();
+    if (!SGP_setup()){
+        UnitNames[3].status = "SGP40 not found";
+    }
+    if (!Osetup()){
+        UnitNames[2].status = "Ozone sensor not found";
+    }
+    if (!B_setup()){
+        UnitNames[4].status = "BMP280 not found";
+    }
+    
     UnitNames[4].status = B_setup();
     test();
 }
@@ -124,15 +147,7 @@ void Logg(){
     Serial.println("Logged data");
 };
 
-void startup(){
-    
-    for (int i = 0; i < 10; i++) {
-        Logg();
-        delay(1000);
-    }
-    Serial.println("Data logging finished.");
-    
-}
+
 
 void test(){ 
     String data = readSensors().toString();
@@ -152,11 +167,12 @@ String getinfo() {
 
 SensorData readSensors() {
     SensorData d;
-
+    d.gyrox, d.gyroy, d.gyroz = GetGyroData();
     d.time = esp_timer_get_time();
     d.temp = readTemperature();
     d.pressure = readPressure();
-
+    d.NO = readNO();
+    d.UV = readUV();
     d.tf = static_cast<float>(d.temp);
     d.voc_index = SGP_loop(d.tf);
     d.sraw = Get_raw(d.tf);

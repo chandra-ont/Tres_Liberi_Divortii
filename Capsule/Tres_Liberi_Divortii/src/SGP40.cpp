@@ -5,18 +5,16 @@ Adafruit_SGP40 sgp;
 
 int trys = 0;
 int SGP_setup() {
-  while (!Serial) { delay(10); } // Wait for serial console to open!
-
-  Serial.println("SGP40 test");
-
-  if (! sgp.begin()){
+ while (!sgp.begin() && trys < 10) {
     Serial.println("Sensor not found :(");
-    while (1);
+    trys++;
+    delay(1000);
   }
-  Serial.print("Found SGP40 serial #");
-  Serial.print(sgp.serialnumber[0], HEX);
-  Serial.print(sgp.serialnumber[1], HEX);
-  Serial.println(sgp.serialnumber[2], HEX);
+  
+  if (trys >= 10) {
+    return false;
+  }
+  return true;
 }
 
 int counter = 0;
@@ -41,8 +39,6 @@ int32_t SGP_loop(float t ) {
   Serial.print("Voc Index: ");
   Serial.println(voc_index);
 
-  if (true){
-    return voc_index;
   
-  }
+  return voc_index;
 }

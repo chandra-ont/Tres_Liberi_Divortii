@@ -8,7 +8,7 @@ Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
 
 String B_setup() {
-  String err = "Working";
+  String err = "OK";
   Serial.println(F("BMP280 Sensor start test"));
 
   unsigned status;
@@ -22,7 +22,7 @@ String B_setup() {
     Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
     Serial.print("        ID of 0x60 represents a BME 280.\n");
     Serial.print("        ID of 0x61 represents a BME 680.\n");
-    while (1) delay(10);
+    return err;
   }
 
   /* Default settings from datasheet. */

@@ -2,7 +2,7 @@
 
 
 int pin = 21; 
-int read(){
+int readNO(){
   int val = analogRead(pin);
   return val;
 }

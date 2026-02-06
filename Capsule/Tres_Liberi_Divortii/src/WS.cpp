@@ -12,8 +12,6 @@ WiFiClient client;
 // Single function version
 // ----------------------
 void WsetupAndSend(const char* data) {
-  Serial.begin(115200);
-  delay(200);
   Serial.println("Starting WsetupAndSend...");
 
   // --- Connect Wi-Fi ---

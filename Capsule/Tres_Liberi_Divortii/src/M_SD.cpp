@@ -5,7 +5,7 @@
 // using std::string>
 
 File root;
-File dataFile;
+File datFile;
 void printDirectory(File dir, int numTabs) {
 
 
@@ -49,21 +49,24 @@ void printDirectory(File dir, int numTabs) {
 
   }
 }
-int SD_setup(int spiPin,
+int SD_setup(
               const char* h1,
               const char* h2,
               const char* h3,
               const char* h4,
-              const char* h5){
+              const char* h5,
+              const char* h6,
+              const char* h7,
+              const char* h8,
+              const char* h9
+              ) {
     
 
     Serial.println("Initializing SD card...");
-    while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-    }
-    if (!SD.begin(4)) {
+    
+    if (!SD.begin(2)) {
     Serial.println("initialization failed!");
-    while (1);
+    return false;
     }
     Serial.println("\n initialization done.");
 
@@ -74,23 +77,23 @@ int SD_setup(int spiPin,
     Serial.print("Starting up file.csv \n headers: ");
     Serial.println(header);
 
-    dataFile = SD.open("file.csv", FILE_WRITE);
-    if (dataFile) {
-    return true;
-    dataFile.println(header); 
-    
+    datFile = SD.open("file.csv", FILE_WRITE);
+    if (datFile) {
+
+    datFile.println(header); 
+    datFile.close();
     return true;
     } else {
     return false;
     }
-    dataFile.close();
+    datFile.close();
 }
 int SD_log(int64_t time, int32_t voc, uint16_t sraw, float temp, float pressure) {
-    File dataFile = SD.open("file.csv", FILE_WRITE);
-    if (dataFile) {
-        dataFile.printf("%lld,%d,%u,%f,%f\n",
+    File datFile = SD.open("file.csv", FILE_WRITE);
+    if (datFile) {
+        datFile.printf("%lld,%d,%u,%f,%f\n",
                         (long long)time, voc, sraw, temp, pressure);
-        dataFile.close();
+        datFile.close();
         Serial.println("Wrote new line to file.csv");
         return true;
     } else {
