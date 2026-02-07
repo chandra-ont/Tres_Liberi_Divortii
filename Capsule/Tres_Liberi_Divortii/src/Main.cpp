@@ -125,7 +125,8 @@ void setup()
 
     pinMode(CS_SD, OUTPUT);
     
-    digitalWrite(CS_SD, LOW);
+    // Keep SD CS high (not selected) before SD.begin()
+    digitalWrite(CS_SD, HIGH);
     
     // Pass SPI instance to SD module
     spi_instance = &spi;
@@ -137,7 +138,7 @@ void setup()
 
 
     // SETUP sensors
-    if (!SD_setup("Time", "Voc_idx", "Sraw_SGP", "Temp", "pressure", "NO", "UV", "ozone", "gyro")) {
+    if (!SD_setup(CS_SD, "Time", "Voc_idx", "Sraw_SGP", "Temp", "pressure", "NO", "UV", "ozone", "gyro")) {
         UnitNames[0].status = "Failed to write SD";
     }
     if (!SGP_setup()){
@@ -149,8 +150,6 @@ void setup()
     if (!B_setup()){
         UnitNames[4].status = "BMP280 not found";
     }
-    
-    UnitNames[4].status = B_setup();
     test();
 }
 
@@ -177,7 +176,26 @@ void Logg(){
     if (UnitNames[0].status == "OK") {
     SD_log(d.time, d.tf, d.voc_index, d.sraw, d.temp, d.pressure, d.NO, d.UV);
     }
-
+    if (Serial.available()) {
+        if (Serial.read() == 't') {
+            String info = getinfo();
+            String data = d.toString();
+            Serial.println(info);
+            Serial.println(data);
+            Serial.println("Logged data: ");
+            File f = LittleFS.open("/log.csv", "r");
+            if (f) {
+                while (f.available()) {
+                    Serial.write(f.read());
+                }
+                f.close();
+            }
+        }
+        else {
+            Serial.println("Press 't' to print sensor info and logged data or remove slad in 5");
+            delay(7000);
+        }
+    }
 };
 
 
@@ -210,8 +228,14 @@ SensorData readSensors() {
     d.UV = readUV();
 
     d.tf = static_cast<float>(d.temp);
-    d.voc_index = SGP_loop(d.tf);
-    d.sraw = Get_raw(d.tf);
+    // Only query SGP40 if it was initialized successfully
+    if (UnitNames[3].status == "OK") {
+        d.voc_index = SGP_loop(d.tf);
+        d.sraw = Get_raw(d.tf);
+    } else {
+        d.voc_index = 0;
+        d.sraw = 0;
+    }
 
     return d;
 }

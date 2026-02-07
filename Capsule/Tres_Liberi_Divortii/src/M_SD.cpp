@@ -50,7 +50,7 @@ void printDirectory(File dir, int numTabs) {
 
   }
 }
-int SD_setup(
+int SD_setup(int csPin,
               const char* h1,
               const char* h2,
               const char* h3,
@@ -66,24 +66,38 @@ int SD_setup(
     Serial.println("Initializing SD card...");
     Serial.print("SPI instance: ");
     Serial.println((uint32_t)spi_instance, HEX);
+    Serial.print("SD CS pin: ");
+    Serial.println(csPin);
     
     int result = false;
     
     if (spi_instance != nullptr) {
-        Serial.println("Using external SPI instance...");
-        result = SD.begin(2, *spi_instance);
+      Serial.println("Using external SPI instance...");
+      result = SD.begin(csPin, *spi_instance);
     } else {
-        Serial.println("Using default SPI...");
-        result = SD.begin(2);
+      Serial.println("Using default SPI...");
+      result = SD.begin(csPin);
     }
     
     if (!result) {
-        Serial.println("initialization failed!");
-        return false;
+      Serial.println("initialization failed!");
+      return false;
     }
     Serial.println("\n initialization done.");
 
+    uint8_t cardType = SD.cardType();
+    Serial.print("Card Type: ");
+    Serial.println(cardType);
+
+    uint64_t cardSize = SD.cardSize();
+    Serial.print("Card Size (MB): ");
+    Serial.println(cardSize / (1024 * 1024));
+
     root = SD.open("/");
+    if (!root) {
+      Serial.println("Failed to open root directory after init");
+      return false;
+    }
     printDirectory(root, 0);
     root.close();
     String header = String(h1) + "," + String(h2) + "," + String(h3) + "," + String(h4) + "," + String(h5);
