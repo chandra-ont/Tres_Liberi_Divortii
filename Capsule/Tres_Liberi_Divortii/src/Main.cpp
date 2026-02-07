@@ -114,6 +114,13 @@ void ensureCSVHeader() {
 void setup()
 {
     Serial.begin(9600);
+    
+    // Mount LittleFS file system
+    if (!LittleFS.begin(true)) {
+        Serial.println("LittleFS mount failed!");
+        return;
+    }
+    
     ensureCSVHeader();
     //UART FOR GPS NOT USED IN KVAL
     // Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
