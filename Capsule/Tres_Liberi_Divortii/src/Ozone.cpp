@@ -13,10 +13,11 @@ int Osetup() {
   delay(1000); // wait for sensor to power up
   // initialize sensor at address SENSOR_ADDR
   if (!ozone.begin(SENSOR_ADDR)) {
-    Serial.println("Ozone sensor init failed. Check wiring and address.");
-    while (1) delay(1000);
+    
+    delay(1000);
     t++;
     if (t > 3) {
+    Serial.println("Ozone sensor init failed. Check wiring and address.");
     t=0;
     return false;
     };

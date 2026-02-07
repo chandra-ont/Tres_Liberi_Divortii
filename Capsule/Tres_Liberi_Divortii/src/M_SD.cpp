@@ -1,8 +1,9 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SdFat.h>
-// #include <string>
-// using std::string>
+#include "M_SD.h"
+
+SPIClass* spi_instance = nullptr;
 
 File root;
 File datFile;
@@ -63,10 +64,22 @@ int SD_setup(
     
 
     Serial.println("Initializing SD card...");
+    Serial.print("SPI instance: ");
+    Serial.println((uint32_t)spi_instance, HEX);
     
-    if (!SD.begin(2)) {
-    Serial.println("initialization failed!");
-    return false;
+    int result = false;
+    
+    if (spi_instance != nullptr) {
+        Serial.println("Using external SPI instance...");
+        result = SD.begin(2, *spi_instance);
+    } else {
+        Serial.println("Using default SPI...");
+        result = SD.begin(2);
+    }
+    
+    if (!result) {
+        Serial.println("initialization failed!");
+        return false;
     }
     Serial.println("\n initialization done.");
 
@@ -88,11 +101,18 @@ int SD_setup(
     }
     datFile.close();
 }
-int SD_log(int64_t time, int32_t voc, uint16_t sraw, float temp, float pressure) {
+int SD_log(int64_t time,
+    float tf,
+    int32_t voc_index,
+    uint16_t sraw,
+    int temp,
+    int pressure,
+    int NO,
+    int UV) {
     File datFile = SD.open("file.csv", FILE_WRITE);
     if (datFile) {
-        datFile.printf("%lld,%d,%u,%f,%f\n",
-                        (long long)time, voc, sraw, temp, pressure);
+        datFile.printf("%lld,%f,%d,%u,%d,%d,%d,%d\n",
+                        time, tf, voc_index, sraw, temp, pressure, NO, UV);
         datFile.close();
         Serial.println("Wrote new line to file.csv");
         return true;
@@ -135,7 +155,5 @@ void printCSVFile(const char* filename) {
   Serial.println("----------------------------------------");
   Serial.print("Total lines: ");
   Serial.println(lineNumber - 1);
-  
-  dataFile.close();
 }
 

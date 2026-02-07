@@ -1,16 +1,17 @@
+#include "LittleFS.h"
+
+
 #include <Arduino.h>
-#include <SPI.h>
+
 
 #include "M_SD.h"
 #include "SGP40.h"
 #include "esp_timer.h"
 #include "bmp280.h"
-#include "WS.h"
+
 #include "Ozone.h"
 #include "NO.h"
 #include "UV.h"
-#include "gyro.h"
-
 #include <Wire.h>
 #include <SPI.h>
 #include <vector>
@@ -40,9 +41,6 @@ struct SensorData {
     int pressure;
     int NO;
     int UV;
-    float gyrox;
-    float gyroy;
-    float gyroz;
     String toString() const {
         return String(time) + "," +
                String(temp) + "," +
@@ -51,9 +49,7 @@ struct SensorData {
                String(voc_index) + "," +
                String(NO) + "," +
                String(UV) + "," +
-               String(gyrox) + "," +
-               String(gyroy) + "," +
-               String(gyroz) + "," +
+               
                String(sraw);
     }
 };
@@ -87,9 +83,38 @@ SensorData readSensors();
 String getinfo();
 void test();
 
+void appendToFlash(const SensorData &d) {
+    File f = LittleFS.open("/log.csv", FILE_APPEND);
+    if (!f) {
+        Serial.println("Failed to open file");
+        return;
+    }
+
+    String line = d.toString();
+    f.println(line);
+
+    f.close();
+}
+void ensureCSVHeader() {
+    if (!LittleFS.exists("/log.csv")) {
+        File f = LittleFS.open("/log.csv", FILE_WRITE);
+        if (!f) {
+            Serial.println("Failed to create log file");
+            return;
+        }
+
+        f.println("time,temp,pressure,tf,voc_index,NO,UV,sraw");
+        f.close();
+
+        Serial.println("CSV header written");
+    }
+}
+
+
 void setup()
 {
-    Serial.begin(9200);
+    Serial.begin(9600);
+    ensureCSVHeader();
     //UART FOR GPS NOT USED IN KVAL
     // Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
 
@@ -100,9 +125,10 @@ void setup()
 
     pinMode(CS_SD, OUTPUT);
     
-
-    digitalWrite(CS_SD, HIGH);
+    digitalWrite(CS_SD, LOW);
     
+    // Pass SPI instance to SD module
+    spi_instance = &spi;
 
     //I²C SETUP
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -130,11 +156,17 @@ void setup()
 
 void loop()
 {        
-    startup();
     
     
+    SensorData data = readSensors();
     
-    printCSVFile("file.csv");
+    if (UnitNames[0].status == "OK") {
+        SD_log(data.time, data.tf, data.voc_index, data.sraw, data.temp, data.pressure, data.NO, data.UV);
+    }
+    else {
+        appendToFlash(data);    
+    }
+    delay(5000);  // DO NOT log every loop
 }
 
 
@@ -142,9 +174,10 @@ void Logg(){
     
 
     SensorData d = readSensors();
-    SD_log(d.time, d.voc_index, d.sraw, d.temp, d.pressure);
-    
-    Serial.println("Logged data");
+    if (UnitNames[0].status == "OK") {
+    SD_log(d.time, d.tf, d.voc_index, d.sraw, d.temp, d.pressure, d.NO, d.UV);
+    }
+
 };
 
 
@@ -153,7 +186,7 @@ void test(){
     String data = readSensors().toString();
     String info = getinfo();
     String combined = info + "\n" + data;
-    WsetupAndSend(combined.c_str());
+    Serial.println(combined);
 }
 
 String getinfo() {
@@ -167,12 +200,15 @@ String getinfo() {
 
 SensorData readSensors() {
     SensorData d;
-    d.gyrox, d.gyroy, d.gyroz = GetGyroData();
     d.time = esp_timer_get_time();
+    if (UnitNames[4].status == "OK") {
     d.temp = readTemperature();
     d.pressure = readPressure();
+    }
+    else {d.temp, d.pressure = 0, 0;}
     d.NO = readNO();
     d.UV = readUV();
+
     d.tf = static_cast<float>(d.temp);
     d.voc_index = SGP_loop(d.tf);
     d.sraw = Get_raw(d.tf);

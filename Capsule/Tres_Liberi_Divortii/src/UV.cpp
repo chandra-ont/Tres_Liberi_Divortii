@@ -1,7 +1,7 @@
 #include <Wire.h>
 
 
-int UVpin = 2; 
+int UVpin = 0; 
 int readUV(){
   int val = analogRead(UVpin);
   return val;

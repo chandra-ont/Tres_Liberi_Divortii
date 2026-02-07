@@ -1,8 +1,17 @@
 #pragma once
 #include <stdint.h>
+#include <SPI.h>
 
+extern SPIClass* spi_instance;
 
-int SD_log(int64_t time, int32_t voc, uint16_t sraw, float temp, float pressure);
+int SD_log(int64_t time,
+    float tf,
+    int32_t voc_index,
+    uint16_t sraw,
+    int temp,
+    int pressure,
+    int NO,
+    int UV);
 int SD_setup(const char* h1,
               const char* h2,
               const char* h3,
